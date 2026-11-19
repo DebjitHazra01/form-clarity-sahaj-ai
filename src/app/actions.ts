@@ -7,7 +7,6 @@ import { extractFormValues, type ExtractFormValuesInput, type ExtractFormValuesO
 import { getServiceCenterInfo, type GetServiceCenterInfoInput, type GetServiceCenterInfoOutput } from '@/ai/flows/get-service-center-info';
 import { askFormChat, type FormChatInput, type FormChatOutput } from '@/ai/flows/form-chat';
 import { authenticateUser, type LoginResponse } from '@/lib/auth';
-export type { LoginResponse };
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
