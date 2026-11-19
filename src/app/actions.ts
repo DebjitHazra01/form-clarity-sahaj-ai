@@ -6,6 +6,8 @@ import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput } from '@
 import { extractFormValues, type ExtractFormValuesInput, type ExtractFormValuesOutput } from '@/ai/flows/extract-form-values';
 import { getServiceCenterInfo, type GetServiceCenterInfoInput, type GetServiceCenterInfoOutput } from '@/ai/flows/get-service-center-info';
 import { askFormChat, type FormChatInput, type FormChatOutput } from '@/ai/flows/form-chat';
+import { authenticateUser, type LoginResponse } from '@/lib/auth';
+export type { LoginResponse };
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
 
@@ -59,64 +61,14 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Pr
   });
 }
 
-export type LoginResponse = {
-  token: string;
-  success: boolean;
-  role?: string;
-  error?: string;
-};
-
 /**
- * Authentication action for JWT-based auth.
- * Supports citizen and admin accounts without throwing uncaught server component exceptions.
+ * Authentication action for JWT-based auth (delegates to pure client/server auth utility).
  */
 export async function loginAction(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const trimmedEmail = (email || '').trim();
-  const trimmedPassword = (password || '').trim();
-
-  if (!trimmedEmail || !trimmedEmail.includes('@')) {
-    return {
-      token: '',
-      success: false,
-      error: 'Please enter a valid email address.',
-    };
-  }
-
-  if (!trimmedPassword || trimmedPassword.length < 4) {
-    return {
-      token: '',
-      success: false,
-      error: 'Password must be at least 4 characters long.',
-    };
-  }
-
-  const role =
-    trimmedPassword === 'admin123' || trimmedEmail.toLowerCase().includes('admin')
-      ? 'admin'
-      : 'user';
-  const name = trimmedEmail.split('@')[0];
-
-  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
-  const payload = Buffer.from(
-    JSON.stringify({
-      sub: `user_${Date.now()}`,
-      email: trimmedEmail,
-      name,
-      role,
-      iat: Math.floor(Date.now() / 1000),
-    })
-  ).toString('base64');
-  const signature = 'sahaj_jwt_token';
-  const token = `${header}.${payload}.${signature}`;
-
-  return {
-    token,
-    success: true,
-    role,
-  };
+  return authenticateUser(email, password);
 }
 
 export async function getExplanationAction(

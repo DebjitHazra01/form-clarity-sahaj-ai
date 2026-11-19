@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '30mb',
+      allowedOrigins: ['*.vercel.app', 'localhost:9002', 'localhost:3000'],
     },
   },
   typescript: {

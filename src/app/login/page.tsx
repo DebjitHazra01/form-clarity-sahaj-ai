@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from 'react';
 import { useAuth } from '@/components/app/auth-context';
-import { loginAction } from '@/app/actions';
+import { authenticateUser } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -19,10 +19,10 @@ export default function LoginPage() {
   const { login } = useAuth();
   const { toast } = useToast();
 
-  const handleSignInWithCredentials = async (emailToUse: string, passwordToUse: string) => {
+  const handleSignInWithCredentials = (emailToUse: string, passwordToUse: string) => {
     setIsLoading(true);
     try {
-      const response = await loginAction(emailToUse, passwordToUse);
+      const response = authenticateUser(emailToUse, passwordToUse);
       if (!response.success || !response.token) {
         toast({
           variant: "destructive",
