@@ -83,10 +83,24 @@ export async function getExplanationAction(
     ? getAadhaarForm1Explanation(input.language)
     : getFallbackExplanation(input.language, input.fileName);
 
+  if (!fallback.designatedOfficeGuidance) {
+    fallback.designatedOfficeGuidance = getFormDesignatedOfficeGuidance(
+      fallback.formTitle || input.fileName || '',
+      fallback.issuingDepartment || ''
+    );
+  }
+
+  // Fast-Path: If Gemini API key is not configured in Vercel environment variables,
+  // return the high-quality structured fallback immediately (<10ms) to prevent Vercel 10s lambda timeouts.
+  if (!process.env.GEMINI_API_KEY) {
+    console.warn('[AI Fast-Path] GEMINI_API_KEY is not configured. Returning instant structured fallback.');
+    return fallback;
+  }
+
   try {
     const result = await withTimeout(
       retryWhenBusy(() => explainGovernmentForm(input)),
-      45000,
+      8000,
       fallback
     );
 
@@ -106,18 +120,28 @@ export async function getExplanationAction(
 }
 
 export async function askFormChatAction(input: FormChatInput): Promise<FormChatOutput> {
+  const defaultAnswer: FormChatOutput = {
+    answer: `According to official administrative guidance for ${input.formContext.formTitle}, you can verify specific requirements directly at your nearest ${input.formContext.issuingDepartment} center or by calling toll-free ${input.formContext.officialHelpline || '1947'}.`,
+    suggestedFollowUps: [
+      'What documents are compulsory?',
+      'Where is my nearest service center?',
+      'What are the fees or processing timeline?',
+    ],
+  };
+
+  if (!process.env.GEMINI_API_KEY) {
+    return defaultAnswer;
+  }
+
   try {
-    return await retryWhenBusy(() => askFormChat(input));
+    return await withTimeout(
+      retryWhenBusy(() => askFormChat(input)),
+      8000,
+      defaultAnswer
+    );
   } catch (error: any) {
     console.error('Error in askFormChatAction:', error);
-    return {
-      answer: `Sahaj AI Assistant is currently processing a high volume of requests. According to official administrative guidance, for ${input.formContext.formTitle}, you can verify specific requirements directly at your nearest ${input.formContext.issuingDepartment} center or by calling toll-free ${input.formContext.officialHelpline || '1947'}.`,
-      suggestedFollowUps: [
-        'What documents are compulsory?',
-        'Where is my nearest service center?',
-        'What are the fees or processing timeline?',
-      ],
-    };
+    return defaultAnswer;
   }
 }
 
@@ -137,21 +161,39 @@ export async function getServiceCenterInfoAction(input: GetServiceCenterInfoInpu
 }
 
 export async function translateExplanationAction(input: TranslateFormExplanationInput): Promise<TranslateFormExplanationOutput> {
+  const defaultFallback: TranslateFormExplanationOutput = {
+    translatedExplanation: input.explanation,
+    translatedChecklist: input.checklist,
+  };
+
+  if (!process.env.GEMINI_API_KEY) {
+    return defaultFallback;
+  }
+
   try {
-    const result = await translateFormExplanation(input);
+    const result = await withTimeout(
+      translateFormExplanation(input),
+      8000,
+      defaultFallback
+    );
     return result;
   } catch (error: any) {
     console.error('Error in translateExplanationAction:', error);
-    return {
-      translatedExplanation: input.explanation,
-      translatedChecklist: input.checklist,
-    };
+    return defaultFallback;
   }
 }
 
 export async function textToSpeechAction(input: TextToSpeechInput): Promise<TextToSpeechOutput> {
+  if (!process.env.GEMINI_API_KEY) {
+    return { audioDataUri: '' };
+  }
+
   try {
-    const result = await textToSpeech(input);
+    const result = await withTimeout(
+      textToSpeech(input),
+      8000,
+      { audioDataUri: '' }
+    );
     return result;
   } catch (error: any) {
     console.warn('textToSpeechAction fallback:', error?.message || error);
@@ -162,10 +204,14 @@ export async function textToSpeechAction(input: TextToSpeechInput): Promise<Text
 export async function extractFormValuesAction(input: ExtractFormValuesInput): Promise<ExtractFormValuesOutput> {
   const fallback = getFallbackExtractedValues(input);
 
+  if (!process.env.GEMINI_API_KEY) {
+    return fallback;
+  }
+
   try {
     const result = await withTimeout(
       retryWhenBusy(() => extractFormValues(input)),
-      6000,
+      8000,
       fallback
     );
 
