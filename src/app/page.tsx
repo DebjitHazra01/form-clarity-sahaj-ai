@@ -1,7 +1,5 @@
 'use client';
 
-export const maxDuration = 60;
-
 import { AppHeader } from "@/components/app/header";
 import { SahajApp } from "@/components/app/sahaj-app";
 import { useAuth } from "@/components/app/auth-context";

@@ -79,8 +79,29 @@ export function SahajApp() {
     try {
       const dataUri = await fileToDataUri(file);
       setLoadingStage('Generating explanations in Bengali, Hindi, and English...');
-      const result = await getExplanationAction({ documentDataUri: dataUri, language, fileName: file.name });
-      if (result.explanation || result.explanations) {
+
+      let result;
+      try {
+        const res = await fetch('/api/explain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentDataUri: dataUri, language, fileName: file.name }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            result = json.data;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('API /api/explain fallback to Server Action:', apiErr);
+      }
+
+      if (!result) {
+        result = await getExplanationAction({ documentDataUri: dataUri, language, fileName: file.name });
+      }
+
+      if (result && (result.explanation || result.explanations)) {
         setExplanationResult(result);
         setStep('analysis');
       } else {

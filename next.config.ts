@@ -1,12 +1,9 @@
 import type { NextConfig } from 'next';
-import path from 'path';
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: path.resolve(__dirname),
   experimental: {
     serverActions: {
       bodySizeLimit: '30mb',
-      allowedOrigins: ['*.vercel.app', 'localhost:9002', 'localhost:3000'],
     },
   },
   typescript: {
