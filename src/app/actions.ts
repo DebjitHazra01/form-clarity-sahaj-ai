@@ -26,6 +26,8 @@ import type {
   GetServiceCenterInfoOutput,
 } from '@/ai/flows/get-service-center-info';
 
+import { findNearbyGovernmentOffices } from '@/lib/government-offices';
+
 import type {
   FormChatInput,
   FormChatOutput,
@@ -179,11 +181,70 @@ return await withTimeout(
   }
 }
 
-export async function getServiceCenterInfoAction(input: GetServiceCenterInfoInput): Promise<GetServiceCenterInfoOutput> {
+
+export async function getServiceCenterInfoAction(
+  input: GetServiceCenterInfoInput
+): Promise<GetServiceCenterInfoOutput> {
   try {
-   const { getServiceCenterInfo } = await import(
-  '@/ai/flows/get-service-center-info'
-);
+    const {
+      offices,
+      pinCodeUsed,
+      userLocationApproved,
+    } = await findNearbyGovernmentOffices({
+      pinCode: input.pinCode,
+      latitude: input.latitude,
+      longitude: input.longitude,
+    });
+
+    const formContext = [
+      input.formTitle || '',
+      input.issuingDepartment || '',
+      input.explanation || '',
+    ].join(' ').toLowerCase();
+
+    let searchQuery = 'Government Citizen Service Center';
+
+    if (
+      formContext.includes('aadhaar') ||
+      formContext.includes('uidai')
+    ) {
+      searchQuery = 'Aadhaar Seva Kendra';
+    } else if (formContext.includes('passport')) {
+      searchQuery = 'Passport Seva Kendra';
+    } else if (
+      formContext.includes('rto') ||
+      formContext.includes('transport') ||
+      formContext.includes('driving licence')
+    ) {
+      searchQuery = 'Regional Transport Office';
+    } else if (formContext.includes('post office')) {
+      searchQuery = 'India Post Office';
+    }
+
+    return {
+      searchQuery,
+      offices,
+      pinCodeUsed,
+      locationDetected: userLocationApproved,
+      notes:
+        offices.length === 0
+          ? `No verified local government office was found for PIN code ${pinCodeUsed || 'provided location'}. Please check the official government directories below.`
+          : undefined,
+    };
+  } catch (error) {
+    console.error('Government office lookup failed:', error);
+
+    return {
+      searchQuery: 'Government Citizen Service Center',
+      offices: [],
+      pinCodeUsed: input.pinCode || '',
+      locationDetected: false,
+      notes:
+        'Unable to access the government office directory. Please try again later or use the official government portals below.',
+    };
+  }
+}
+
 
 return await getServiceCenterInfo(input);
   } catch (error: any) {
