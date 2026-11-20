@@ -1,3 +1,4 @@
+
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -6,12 +7,25 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '30mb',
     },
   },
+
+  // Keep Genkit and OpenTelemetry in the native Node.js runtime.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/google-genai',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/instrumentation',
+    '@opentelemetry/api',
+  ],
+
   typescript: {
     ignoreBuildErrors: false,
   },
+
   eslint: {
     ignoreDuringBuilds: true,
   },
+
   images: {
     remotePatterns: [
       {
