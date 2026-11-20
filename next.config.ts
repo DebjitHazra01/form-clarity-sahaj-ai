@@ -12,9 +12,10 @@ const nextConfig: NextConfig = {
     'genkit',
     '@genkit-ai/core',
     '@genkit-ai/google-genai',
+    '@genkit-ai/next',
+    '@opentelemetry/api',
     '@opentelemetry/sdk-node',
     '@opentelemetry/instrumentation',
-    '@opentelemetry/api',
   ],
 
   typescript: {
