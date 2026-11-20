@@ -125,12 +125,15 @@ export async function getExplanationAction(
   }
 
   try {
-    const result = await withTimeout(
-      retryWhenBusy(() => explainGovernmentForm(input)),
-      8000,
-      fallback
-    );
+    const { explainGovernmentForm } = await import(
+  '@/ai/flows/explain-government-form'
+);
 
+const result = await withTimeout(
+  retryWhenBusy(() => explainGovernmentForm(input)),
+  8000,
+  fallback
+);
     // Ensure designatedOfficeGuidance is always enriched
     if (!result.designatedOfficeGuidance) {
       result.designatedOfficeGuidance = getFormDesignatedOfficeGuidance(
