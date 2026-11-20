@@ -1,7 +1,8 @@
-export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getExplanationAction } from '@/app/actions';
 
+export const runtime = 'nodejs';
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('API /api/explain error:', error);
+
     return NextResponse.json(
       {
         success: false,
