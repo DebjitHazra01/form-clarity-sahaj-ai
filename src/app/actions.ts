@@ -164,11 +164,15 @@ export async function askFormChatAction(input: FormChatInput): Promise<FormChatO
   }
 
   try {
-    return await withTimeout(
-      retryWhenBusy(() => askFormChat(input)),
-      8000,
-      defaultAnswer
-    );
+    const { askFormChat } = await import(
+  '@/ai/flows/form-chat'
+);
+
+return await withTimeout(
+  retryWhenBusy(() => askFormChat(input)),
+  8000,
+  defaultAnswer
+);
   } catch (error: any) {
     console.error('Error in askFormChatAction:', error);
     return defaultAnswer;
@@ -177,7 +181,11 @@ export async function askFormChatAction(input: FormChatInput): Promise<FormChatO
 
 export async function getServiceCenterInfoAction(input: GetServiceCenterInfoInput): Promise<GetServiceCenterInfoOutput> {
   try {
-    return await getServiceCenterInfo(input);
+   const { getServiceCenterInfo } = await import(
+  '@/ai/flows/get-service-center-info'
+);
+
+return await getServiceCenterInfo(input);
   } catch (error: any) {
     console.error('Error in getServiceCenterInfoAction:', error);
     return {
@@ -201,11 +209,15 @@ export async function translateExplanationAction(input: TranslateFormExplanation
   }
 
   try {
-    const result = await withTimeout(
-      translateFormExplanation(input),
-      8000,
-      defaultFallback
-    );
+    const { translateFormExplanation } = await import(
+  '@/ai/flows/translate-form-explanation'
+);
+
+const result = await withTimeout(
+  translateFormExplanation(input),
+  8000,
+  defaultFallback
+);
     return result;
   } catch (error: any) {
     console.error('Error in translateExplanationAction:', error);
@@ -219,11 +231,15 @@ export async function textToSpeechAction(input: TextToSpeechInput): Promise<Text
   }
 
   try {
-    const result = await withTimeout(
-      textToSpeech(input),
-      8000,
-      { audioDataUri: '' }
-    );
+    const { textToSpeech } = await import(
+  '@/ai/flows/text-to-speech'
+);
+
+const result = await withTimeout(
+  textToSpeech(input),
+  8000,
+  { audioDataUri: '' }
+);
     return result;
   } catch (error: any) {
     console.warn('textToSpeechAction fallback:', error?.message || error);
@@ -239,11 +255,15 @@ export async function extractFormValuesAction(input: ExtractFormValuesInput): Pr
   }
 
   try {
-    const result = await withTimeout(
-      retryWhenBusy(() => extractFormValues(input)),
-      8000,
-      fallback
-    );
+    const { extractFormValues } = await import(
+  '@/ai/flows/extract-form-values'
+);
+
+const result = await withTimeout(
+  retryWhenBusy(() => extractFormValues(input)),
+  8000,
+  fallback
+);
 
     // Merge Gemini OCR values with smart citizen fallback so NO field is left blank
     const mergedValues: Record<string, string> = {};
