@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Keep Genkit and OpenTelemetry in the native Node.js runtime.
   serverExternalPackages: [
     'genkit',
     '@genkit-ai/core',
