@@ -1,11 +1,38 @@
 'use server';
 
-import { explainGovernmentForm, type ExplainGovernmentFormInput, type ExplainGovernmentFormOutput, getFormDesignatedOfficeGuidance } from '@/ai/flows/explain-government-form';
-import { translateFormExplanation, type TranslateFormExplanationInput, type TranslateFormExplanationOutput } from '@/ai/flows/translate-form-explanation';
-import { textToSpeech, type TextToSpeechInput, type TextToSpeechOutput } from '@/ai/flows/text-to-speech';
-import { extractFormValues, type ExtractFormValuesInput, type ExtractFormValuesOutput } from '@/ai/flows/extract-form-values';
-import { getServiceCenterInfo, type GetServiceCenterInfoInput, type GetServiceCenterInfoOutput } from '@/ai/flows/get-service-center-info';
-import { askFormChat, type FormChatInput, type FormChatOutput } from '@/ai/flows/form-chat';
+
+import type {
+  ExplainGovernmentFormInput,
+  ExplainGovernmentFormOutput,
+} from '@/ai/flows/explain-government-form';
+
+import type {
+  TranslateFormExplanationInput,
+  TranslateFormExplanationOutput,
+} from '@/ai/flows/translate-form-explanation';
+
+import type {
+  TextToSpeechInput,
+  TextToSpeechOutput,
+} from '@/ai/flows/text-to-speech';
+
+import type {
+  ExtractFormValuesInput,
+  ExtractFormValuesOutput,
+} from '@/ai/flows/extract-form-values';
+
+import type {
+  GetServiceCenterInfoInput,
+  GetServiceCenterInfoOutput,
+} from '@/ai/flows/get-service-center-info';
+
+import type {
+  FormChatInput,
+  FormChatOutput,
+} from '@/ai/flows/form-chat';
+
+import { getFormDesignatedOfficeGuidance } from '@/lib/designated-offices';
+
 import { authenticateUser, type LoginResponse } from '@/lib/auth';
 
 const delay = (milliseconds: number) => new Promise(resolve => setTimeout(resolve, milliseconds));
